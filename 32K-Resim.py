@@ -4,7 +4,7 @@ import cv2
 
 pi = 3.1415
 
-width = 18000
+width = 32000
 height = 32000
 
 part = 16
