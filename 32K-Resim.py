@@ -2,46 +2,44 @@ import numpy as np
 import math
 import cv2
 
-img = np.memmap('img.mymemmap', dtype='uint8', mode='w+', shape=(32000,18000,3))
+pi = 3.1415
 
-sayi_listesi_x = np.linspace(0,255,16000)
-sayi_listesi_y = np.linspace(0,255,9000)
+width = 18000
+height = 32000
 
-x,y = np.meshgrid(sayi_listesi_x, sayi_listesi_y)
+part = 16
 
-del sayi_listesi_x
-del sayi_listesi_y
+partWidth = int(width/part)
+partHeigth = int(height/part)
 
-sayi_listesi = np.multiply(x,y)
+partPi = 2*pi/part
 
-del x
-del y
+img = np.memmap('img.mymemmap', dtype='uint8', mode='w+', shape=(width, height, 3))
 
-sayi_listesi = sayi_listesi.reshape((16000,9000))
+for indexX in range(part):
 
-sayi_listesi_0 = np.sin(sayi_listesi) * 255
-sayi_listesi_1 = np.cos(sayi_listesi) * 255
+    sayi_listesi_x = np.mod(np.linspace(indexX*partPi, (indexX+1)*partPi, partWidth), 2*pi)
+    
+    for indexY in range(part):
+    
+        sayi_listesi_y = np.mod(np.linspace(indexY*partPi, (indexY+1)*partPi, partHeigth), 2*pi)
 
-sayi_listesi_0 = sayi_listesi_0.astype(np.uint8)
-sayi_listesi_1 = sayi_listesi_1.astype(np.uint8)
-sayi_listesi = sayi_listesi.astype(np.uint8)
+        x,y = np.meshgrid(sayi_listesi_x, sayi_listesi_y)
 
-img[0:16000,0:9000,:] = np.ones((16000,9000,3), np.uint8)
-img[0:16000,0:9000,0] *= sayi_listesi_0
-img[0:16000,0:9000,1] *= sayi_listesi_1
-img[0:16000,0:9000,2] *= sayi_listesi
+        sayi_listesi = np.multiply(x,y)
 
-img[0:16000,9000:18000,0] = img[0:16000,0:9000,0]
-img[0:16000,9000:18000,1] = img[0:16000,0:9000,1]
-img[0:16000,9000:18000,2] = img[0:16000,0:9000,2]
+        sayi_listesi = sayi_listesi.transpose()
 
-img[16000:32000,0:9000,0] = img[0:16000,0:9000,0]
-img[16000:32000,0:9000,1] = img[0:16000,0:9000,1]
-img[16000:32000,0:9000,2] = img[0:16000,0:9000,2]
+        sayi_listesi_0 = np.sin(sayi_listesi) * 255
+        sayi_listesi_1 = np.cos(sayi_listesi) * 255
 
-img[16000:32000,9000:18000,0] = img[0:16000,0:9000,0]
-img[16000:32000,9000:18000,1] = img[0:16000,0:9000,1]
-img[16000:32000,9000:18000,2] = img[0:16000,0:9000,2]
+        sayi_listesi_0 = sayi_listesi_0.astype(np.uint8)
+        sayi_listesi_1 = sayi_listesi_1.astype(np.uint8)
+        sayi_listesi = sayi_listesi.astype(np.uint8)
 
+        img[indexX*partWidth:(indexX+1)*partWidth, indexY*partHeigth:(indexY+1)*partHeigth, :] = np.ones((partWidth, partHeigth, 3), np.uint8)
+        img[indexX*partWidth:(indexX+1)*partWidth, indexY*partHeigth:(indexY+1)*partHeigth, 0] *= sayi_listesi_0
+        img[indexX*partWidth:(indexX+1)*partWidth, indexY*partHeigth:(indexY+1)*partHeigth, 1] *= sayi_listesi_1
+        img[indexX*partWidth:(indexX+1)*partWidth, indexY*partHeigth:(indexY+1)*partHeigth, 2] *= sayi_listesi_0 + sayi_listesi_1
 
-cv2.imwrite("Photo2.jpg", img)
+cv2.imwrite("Photo1.jpg", img)
